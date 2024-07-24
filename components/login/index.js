@@ -1,9 +1,12 @@
 import React from 'react'
 import {Card, Col, Row, Form, Input, Checkbox, Button} from 'antd'
+import {useRouter} from 'next/router'
 
 const Login = (props) => {
+    const router = useRouter()
     const onFinish = async (values) => {
-        console.log("values: ", values)
+        console.log(values)
+        await router.push(`/warehouse`)
     }
 
     return (
