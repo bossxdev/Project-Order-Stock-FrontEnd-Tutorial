@@ -1,12 +1,21 @@
 import React from 'react'
 import {Card, Col, Row, Form, Input, Checkbox, Button} from 'antd'
 import {useRouter} from 'next/router'
+import {useDispatch} from 'react-redux'
+import {login} from 'store/reducers/auth'
+import Cookies from 'js-cookie'
 
 const Login = (props) => {
     const router = useRouter()
+    const dispatch = useDispatch()
     const onFinish = async (values) => {
-        console.log(values)
-        await router.push(`/warehouse`)
+        const data = {
+            email: values.username,
+            password: values.password
+        }
+        await dispatch(login(data))
+        const token = Cookies.get('token')
+        if (token) await router.push(`/warehouse`)
     }
 
     return (
