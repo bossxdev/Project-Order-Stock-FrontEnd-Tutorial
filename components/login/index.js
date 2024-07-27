@@ -28,8 +28,8 @@ const Login = (props) => {
                         layout="vertical"
                         initialValues={{
                             remember: true,
-                            username: 'inpangxm@gmail.com',
-                            password: '12345678'
+                            username: 'test2',
+                            password: '1234'
                         }}
                         onFinish={onFinish}>
                         <Form.Item
