@@ -10,7 +10,7 @@ const Login = (props) => {
     const dispatch = useDispatch()
     const onFinish = async (values) => {
         const data = {
-            email: values.username,
+            username: values.username,
             password: values.password
         }
         await dispatch(login(data))
