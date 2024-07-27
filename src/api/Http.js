@@ -3,7 +3,7 @@ import Cookies from 'js-cookie'
 import { HTTP_STATUS_CODE } from 'utils/constants'
 
 const Http = axios.create({
-  baseURL: 'http://localhost:4000/api',
+  baseURL: 'http://localhost:5000',
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json; charset=UTF-8',
