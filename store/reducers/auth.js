@@ -2,7 +2,6 @@ import API from 'api/Http'
 import * as EndPoints from 'api/EndPoints'
 import { message } from 'antd'
 import Cookies from 'js-cookie'
-import { HTTP_STATUS_CODE } from 'utils/constants'
 
 const LOGIN_REQUEST = 'Auth/LOGIN_REQUEST'
 const LOGIN_SUCCESS = 'Auth/LOGIN_SUCCESS'
@@ -45,29 +44,6 @@ const auth = (state = initialState, action) => {
 }
 
 export default auth
-
-// Action Creators
-export const getCurrentUser = () => {
-  return async (dispatch) => {
-    try {
-      dispatch({
-        type: FETCH_CURRENT_USER_REQUEST
-      })
-
-      const response = await API.get(EndPoints.USER)
-      if (response.status === HTTP_STATUS_CODE.OK) {
-        dispatch({
-          type: FETCH_CURRENT_USER_SUCCESS,
-          payload: response.data.data[0]
-        })
-      }
-    } catch (err) {
-      dispatch({
-        type: FETCH_CURRENT_USER_FAILURE
-      })
-    }
-  }
-}
 
 export const login = (data) => {
   return async (dispatch) => {
