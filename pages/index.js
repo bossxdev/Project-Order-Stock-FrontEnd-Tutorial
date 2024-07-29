@@ -1,10 +1,10 @@
 import React from "react";
-import Login from "components/login";
+import LoginPage from "./login";
 
 export default function Home() {
     return (
         <>
-            <Login />
+            <LoginPage />
         </>
     );
 }
