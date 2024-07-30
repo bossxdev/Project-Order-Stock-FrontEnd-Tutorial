@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {Form, Input, Modal} from "antd";
 
 export default function CreateProductModal({ visible, onCreate, onCancel }) {
