@@ -1,41 +1,123 @@
-import React from 'react'
-import {Table} from "antd";
+import React, {useState} from 'react';
+import {Table, Tabs, Button, Dropdown, Menu, Checkbox} from 'antd';
+import CreateProductModal from 'components/product';
 
-const dataSource = [
+const dataSources = {
+    1: [
+        {key: '1', name: 'Stock A', date: '2024-07-30', status: 'Active', author: 'Admin'},
+    ],
+    2: [
+        {key: '3', productName: 'Product A', productCode: 'P001', refer: 'Ref001', value: 100},
+        {key: '4', productName: 'Product B', productCode: 'P002', refer: 'Ref002', value: 200},
+    ]
+};
+
+const menu = (
+    <Menu>
+        <Menu.Item key="1">แก้ไข</Menu.Item>
+        <Menu.Item key="2">ลบ</Menu.Item>
+        <Menu.Item key="3">ใบนำออก</Menu.Item>
+    </Menu>
+);
+
+const stockColumn = [
     {
-        key: '1',
-        name: 'Mike',
-        age: 32,
-        address: '10 Downing Street',
+        title: 'ควบคุม',
+        dataIndex: 'action',
+        key: 'action',
+        render: () => (
+            <Dropdown overlay={menu}>
+                <Button onClick={e => e.preventDefault()}>
+                    ตัวเลือก <i className="anticon anticon-down"/>
+                </Button>
+            </Dropdown>
+        ),
     },
-    {
-        key: '2',
-        name: 'John',
-        age: 42,
-        address: '10 Downing Street',
-    },
+    {title: 'วันที่', dataIndex: 'date', key: 'date'},
+    {title: 'ชื่อคลังสินค้า', dataIndex: 'name', key: 'name'},
+    {title: 'สถานะคลังสินค้า', dataIndex: 'status', key: 'status'},
+    {title: 'ดูแลโดย', dataIndex: 'author', key: 'author'},
 ];
 
-const columns = [
+const createStockColumn = [
     {
-        title: 'Name',
-        dataIndex: 'name',
-        key: 'name',
+        title: '',
+        dataIndex: 'select',
+        key: 'select',
+        render: () => <Checkbox/>
     },
     {
-        title: 'Age',
-        dataIndex: 'age',
-        key: 'age',
+        title: 'ชื่อสินค้า',
+        dataIndex: 'productName',
+        key: 'productName'
     },
     {
-        title: 'Address',
-        dataIndex: 'address',
-        key: 'address',
+        title: 'รหัสสินค้า',
+        dataIndex: 'productCode',
+        key: 'productCode'
+    },
+    {
+        title: 'อ้างอิง',
+        dataIndex: 'refer',
+        key: 'refer'
+    },
+    {
+        title: 'จำนวน',
+        dataIndex: 'value',
+        key: 'value'
     },
 ];
 
 export default function WarehousePage() {
+    const [currentTab, setCurrentTab] = useState('1');
+    const [isModalVisible, setIsModalVisible] = useState(false);
+
+    const handleTabChange = (key) => {
+        setCurrentTab(key);
+    };
+
+    const handleCreateProduct = () => {
+        setIsModalVisible(true);
+    };
+
+    const handleCreate = (values) => {
+        console.log('ข้อมูลสินค้า:', values);
+        setIsModalVisible(false);
+    };
+
+    const handleCancel = () => {
+        setIsModalVisible(false);
+    };
+
     return (
-        <Table dataSource={dataSource} columns={columns}/>
+        <>
+            <Tabs defaultActiveKey="1" onChange={handleTabChange}>
+                <Tabs.TabPane tab="รายการคลังสินค้า" key="1"/>
+                <Tabs.TabPane tab="เพิ่มสินค้าในคลัง" key="2"/>
+            </Tabs>
+            {currentTab === '2' && (
+                <div style={{marginBottom: 16, textAlign: 'right'}}>
+                    <Button type="primary" size="large" onClick={handleCreateProduct}>
+                        สร้างสินค้าใหม่
+                    </Button>
+                </div>
+            )}
+            <Table
+                dataSource={dataSources[currentTab]}
+                columns={currentTab === '1' ? stockColumn : createStockColumn}
+            />
+            {currentTab === '2' && (
+                <div style={{marginBottom: 16, textAlign: 'left'}}>
+                    <Button type="primary" size="large">
+                        เพิ่มสินค้า
+                    </Button>
+                </div>
+            )}
+            <CreateProductModal
+                visible={isModalVisible}
+                onCreate={handleCreate}
+                onCancel={handleCancel}
+            />
+        </>
     );
-};
+}
