@@ -95,7 +95,7 @@ const ProductDetailsTable = ({product}) => {
     );
 };
 
-export default function Shelf() {
+export default function ShelfPage() {
     const router = useRouter()
 
     const handleCancel = () => {
