@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Table, Tabs, Button, Dropdown, Menu, Checkbox, Modal } from 'antd';
 import CreateProductModal from 'components/product';
+import {useRouter} from "next/router";
 
 const dataSources = {
     1: [
@@ -12,63 +13,8 @@ const dataSources = {
     ]
 };
 
-const menu = (
-    <Menu>
-        <Menu.Item key="1">แก้ไข</Menu.Item>
-        <Menu.Item key="2">ลบ</Menu.Item>
-        <Menu.Item key="3">ใบนำออก</Menu.Item>
-    </Menu>
-);
-
-const stockColumn = [
-    {
-        title: 'ควบคุม',
-        dataIndex: 'action',
-        key: 'action',
-        render: () => (
-            <Dropdown overlay={menu}>
-                <Button onClick={e => e.preventDefault()}>
-                    ตัวเลือก <i className="anticon anticon-down" />
-                </Button>
-            </Dropdown>
-        ),
-    },
-    { title: 'วันที่', dataIndex: 'date', key: 'date' },
-    { title: 'ชื่อคลังสินค้า', dataIndex: 'name', key: 'name' },
-    { title: 'สถานะคลังสินค้า', dataIndex: 'status', key: 'status' },
-    { title: 'ดูแลโดย', dataIndex: 'author', key: 'author' },
-];
-
-const createStockColumn = [
-    {
-        title: '',
-        dataIndex: 'select',
-        key: 'select',
-        render: () => <Checkbox />
-    },
-    {
-        title: 'ชื่อสินค้า',
-        dataIndex: 'productName',
-        key: 'productName'
-    },
-    {
-        title: 'รหัสสินค้า',
-        dataIndex: 'productCode',
-        key: 'productCode'
-    },
-    {
-        title: 'อ้างอิง',
-        dataIndex: 'refer',
-        key: 'refer'
-    },
-    {
-        title: 'จำนวน',
-        dataIndex: 'value',
-        key: 'value'
-    },
-];
-
 export default function WarehousePage() {
+    const router = useRouter(); // Hook for navigation
     const [currentTab, setCurrentTab] = useState('1');
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [isPromptVisible, setIsPromptVisible] = useState(false);
@@ -94,6 +40,69 @@ export default function WarehousePage() {
         setIsModalVisible(false);
         setIsPromptVisible(false);
     };
+
+    const handleMenuClick = (e) => {
+        if (e.key === '1') {
+            router.push('/shelf'); // Navigate to /shelf
+        }
+        // You can add additional navigation logic based on other keys if needed
+    };
+
+    const menu = (
+        <Menu onClick={handleMenuClick}>
+            <Menu.Item key="1">แก้ไข</Menu.Item>
+            <Menu.Item key="2">ลบ</Menu.Item>
+            <Menu.Item key="3">ใบนำออก</Menu.Item>
+        </Menu>
+    );
+
+    const stockColumn = [
+        {
+            title: 'ควบคุม',
+            dataIndex: 'action',
+            key: 'action',
+            render: () => (
+                <Dropdown overlay={menu}>
+                    <Button onClick={(e) => e.preventDefault()}>
+                        ตัวเลือก <i className="anticon anticon-down" />
+                    </Button>
+                </Dropdown>
+            ),
+        },
+        { title: 'วันที่', dataIndex: 'date', key: 'date' },
+        { title: 'ชื่อคลังสินค้า', dataIndex: 'name', key: 'name' },
+        { title: 'สถานะคลังสินค้า', dataIndex: 'status', key: 'status' },
+        { title: 'ดูแลโดย', dataIndex: 'author', key: 'author' },
+    ];
+
+    const createStockColumn = [
+        {
+            title: '',
+            dataIndex: 'select',
+            key: 'select',
+            render: () => <Checkbox />
+        },
+        {
+            title: 'ชื่อสินค้า',
+            dataIndex: 'productName',
+            key: 'productName'
+        },
+        {
+            title: 'รหัสสินค้า',
+            dataIndex: 'productCode',
+            key: 'productCode'
+        },
+        {
+            title: 'อ้างอิง',
+            dataIndex: 'refer',
+            key: 'refer'
+        },
+        {
+            title: 'จำนวน',
+            dataIndex: 'value',
+            key: 'value'
+        },
+    ];
 
     return (
         <>
