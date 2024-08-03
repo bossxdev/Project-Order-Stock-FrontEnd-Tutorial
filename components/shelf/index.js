@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {Table, Card, Radio, Button} from 'antd';
+import {Table, Card, Radio, Button, Modal} from 'antd';
 import {useRouter} from "next/router";
 
 // Main table columns
@@ -60,7 +60,7 @@ const data = [
 ];
 
 // Sub-table columns
-const productColumns = (selectedRadio, handleRadioChange) => [
+const productColumns = (selectedRadio, handleRadioChange, showModal) => [
     {
         title: '',
         key: 'select',
@@ -70,13 +70,18 @@ const productColumns = (selectedRadio, handleRadioChange) => [
                     checked={selectedRadio === record.key}
                     onChange={() => handleRadioChange(record.key)}
                 />
-                {` ${record.stock}`}
+                <span
+                    onClick={() => showModal(record.key)}
+                    style={{cursor: 'pointer', marginLeft: 8}}
+                >
+          {` ${record.stock}`}
+        </span>
             </div>
         ),
     }
 ];
 
-const ProductDetailsTable = ({product}) => {
+const ProductDetailsTable = ({product, showModal}) => {
     const [selectedRadio, setSelectedRadio] = useState(null);
 
     const handleRadioChange = (key) => {
@@ -85,7 +90,7 @@ const ProductDetailsTable = ({product}) => {
 
     return (
         <Table
-            columns={productColumns(selectedRadio, handleRadioChange)}
+            columns={productColumns(selectedRadio, handleRadioChange, showModal)}
             dataSource={product}
             pagination={false}
             showHeader={false}  // Hide the header row
@@ -97,9 +102,19 @@ const ProductDetailsTable = ({product}) => {
 
 export default function ShelfPage() {
     const router = useRouter()
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [modalContent, setModalContent] = useState(null);
+
+    const showModal = (id) => {
+        setModalContent(`Warehouse ID: ${id}`);
+        setIsModalVisible(true);
+    };
+
+    const handleOk = () => {
+    };
 
     const handleCancel = () => {
-        router.push('/warehouse'); // Navigate to the home route
+        setIsModalVisible(false);
     };
 
     return (
@@ -114,17 +129,37 @@ export default function ShelfPage() {
                 dataSource={data}
                 pagination={false}
                 expandable={{
-                    expandedRowRender: (record) => <ProductDetailsTable product={record.productDetails}/>,
+                    expandedRowRender: (record) => <ProductDetailsTable product={record.productDetails}
+                                                                        showModal={showModal}/>,
                     expandIcon: () => null, // Hides the expand/collapse icon
                     expandedRowKeys: data.map(record => record.key), // Expand all rows by default
                     rowExpandable: () => true, // Make all rows expandable
                 }}
                 style={{marginTop: 16}}
             />
-            <div style={{ position: 'fixed', bottom: 16, right: 16 }}>
-                <Button type="default" style={{ marginRight: 8 }} onClick={handleCancel}>ยกเลิก</Button>
+            <div style={{position: 'fixed', bottom: 16, right: 16}}>
+                <Button type="default" style={{marginRight: 8}} onClick={handleCancel}>ยกเลิก</Button>
                 <Button type="primary">บันทึก</Button>
             </div>
+            <Modal
+                visible={isModalVisible}
+                onOk={handleOk}
+                onCancel={handleCancel}
+                closable={false}
+                width={800}
+            >
+                {modalContent && (
+                    <div>
+                        <Card title="รายละเอียดชั้นวาง" style={{marginBottom: 16}}>
+                            <div><strong>ชื่อชั้นวาง:</strong> ชั้นวาง 1</div>
+                            <div><strong>วันที่สร้าง:</strong> 01/08/2024</div>
+                            <div><strong>สถานะคลังสินค้า:</strong> Open</div>
+                        </Card>
+                        <Card title="รายการสินค้า" style={{marginBottom: 16}}/>
+                        <Card title="รายการนำออก" style={{marginBottom: 16}}/>
+                    </div>
+                )}
+            </Modal>
         </>
     );
 }
