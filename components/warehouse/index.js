@@ -43,9 +43,11 @@ export default function WarehousePage() {
 
     const handleMenuClick = (e) => {
         if (e.key === '1') {
-            router.push('/shelf'); // Navigate to /shelf
+            router.push('/shelf');
         }
-        // You can add additional navigation logic based on other keys if needed
+        if (e.key === '3') {
+            router.push('/export');
+        }
     };
 
     const menu = (
