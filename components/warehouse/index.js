@@ -1,23 +1,49 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Table, Tabs, Button, Dropdown, Menu, Checkbox, Modal } from 'antd';
 import CreateProductModal from 'components/product';
-import {useRouter} from "next/router";
+import { useRouter } from "next/router";
+import { products } from 'api/Products'; // Adjust the import path according to your project structure
+import { warehouse } from 'api/Warehouse'; // Adjust the import path according to your project structure
 
-const dataSources = {
-    1: [
-        { key: '1', name: 'Stock A', date: '2024-07-30', status: 'Active', author: 'Admin' },
-    ],
-    2: [
-        { key: '3', productName: 'Product A', productCode: 'P001', refer: 'Ref001', value: 100 },
-        { key: '4', productName: 'Product B', productCode: 'P002', refer: 'Ref002', value: 200 },
-    ]
+// Helper function to format date
+const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-CA'); // This format is YYYY-MM-DD
 };
 
 export default function WarehousePage() {
-    const router = useRouter(); // Hook for navigation
+    const router = useRouter();
     const [currentTab, setCurrentTab] = useState('1');
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [isPromptVisible, setIsPromptVisible] = useState(false);
+    const [dataSources, setDataSources] = useState({
+        1: [],
+        2: []
+    });
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            setLoading(true);
+            try {
+                const warehouseResponse = await warehouse();
+                const productsResponse = await products();
+                // Assuming response.data contains the products and warehouse arrays
+                console.log('Warehouse:', warehouseResponse.data);
+                console.log('Products:', productsResponse.data);
+                setDataSources({
+                    1: warehouseResponse.data,
+                    2: productsResponse.data
+                });
+            } catch (error) {
+                setError(error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchData();
+    }, []);
 
     const handleTabChange = (key) => {
         setCurrentTab(key);
@@ -31,9 +57,16 @@ export default function WarehousePage() {
         setIsPromptVisible(true);
     };
 
-    const handleCreate = (values) => {
-        console.log('Product data:', values);
-        setIsModalVisible(false);
+    const handleCreate = async (values) => {
+        try {
+            await createProducts(values);
+            setIsModalVisible(false);
+            // Re-fetch the data to update the table
+            const productsResponse = await products();
+            setDataSources((prev) => ({ ...prev, 2: productsResponse.data }));
+        } catch (error) {
+            console.error('Error creating product:', error);
+        }
     };
 
     const handleCancel = () => {
@@ -45,7 +78,7 @@ export default function WarehousePage() {
         if (e.key === '1') {
             router.push('/shelf');
         }
-        if (e.key === '3') {
+        if (e.key === '2') {
             router.push('/export');
         }
     };
@@ -53,8 +86,7 @@ export default function WarehousePage() {
     const menu = (
         <Menu onClick={handleMenuClick}>
             <Menu.Item key="1">แก้ไข</Menu.Item>
-            <Menu.Item key="2">ลบ</Menu.Item>
-            <Menu.Item key="3">ใบนำออก</Menu.Item>
+            <Menu.Item key="2">ใบนำออก</Menu.Item>
         </Menu>
     );
 
@@ -71,10 +103,27 @@ export default function WarehousePage() {
                 </Dropdown>
             ),
         },
-        { title: 'วันที่', dataIndex: 'date', key: 'date' },
-        { title: 'ชื่อคลังสินค้า', dataIndex: 'name', key: 'name' },
-        { title: 'สถานะคลังสินค้า', dataIndex: 'status', key: 'status' },
-        { title: 'ดูแลโดย', dataIndex: 'author', key: 'author' },
+        {
+            title: 'วันที่',
+            dataIndex: 'updatedAt',
+            key: 'updatedAt',
+            render: (text) => formatDate(text) // Apply date formatting here
+        },
+        {
+            title: 'ชื่อคลังสินค้า',
+            dataIndex: 'warehouseName',
+            key: 'warehouseName'
+        },
+        {
+            title: 'สถานะคลังสินค้า',
+            dataIndex: 'status',
+            key: 'status'
+        },
+        {
+            title: 'ดูแลโดย',
+            dataIndex: 'author',
+            key: 'author'
+        },
     ];
 
     const createStockColumn = [
@@ -82,7 +131,7 @@ export default function WarehousePage() {
             title: '',
             dataIndex: 'select',
             key: 'select',
-            render: () => <Checkbox />
+            render: () => <Checkbox />,
         },
         {
             title: 'ชื่อสินค้า',
@@ -91,20 +140,28 @@ export default function WarehousePage() {
         },
         {
             title: 'รหัสสินค้า',
-            dataIndex: 'productCode',
-            key: 'productCode'
+            dataIndex: 'productId',
+            key: 'productId'
         },
         {
             title: 'อ้างอิง',
-            dataIndex: 'refer',
-            key: 'refer'
+            dataIndex: 'ref',
+            key: 'ref'
         },
         {
             title: 'จำนวน',
-            dataIndex: 'value',
-            key: 'value'
+            dataIndex: 'quantity',
+            key: 'quantity'
         },
     ];
+
+    if (loading) {
+        return <p>Loading...</p>;
+    }
+
+    if (error) {
+        return <p>Error loading data: {error.message}</p>;
+    }
 
     return (
         <>
