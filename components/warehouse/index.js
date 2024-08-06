@@ -117,7 +117,12 @@ export default function WarehousePage() {
         {
             title: 'สถานะคลังสินค้า',
             dataIndex: 'status',
-            key: 'status'
+            key: 'status',
+            render: (text) => (
+                <span style={{ color: text === 'Open' ? 'darkblue' : text === 'Closed' ? 'red' : 'inherit' }}>
+                    {text}
+                </span>
+            )
         },
         {
             title: 'ดูแลโดย',
