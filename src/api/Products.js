@@ -5,7 +5,6 @@ import { HTTP_STATUS_CODE } from 'utils/constants'
 export const products = async (data) => {
     try {
         const response = await API.get(EndPoints.PRODUCT)
-        console.log('response: ', response);
         return response;
     } catch (err) {
         console.log(err);
@@ -16,6 +15,18 @@ export const products = async (data) => {
 export const createProducts = async (data) => {
     try {
         const response = await API.post(EndPoints.PRODUCT + '/create-product', data)
+        return response;
+    } catch (err) {
+        console.log(err);
+        return err;
+    }
+}
+
+export const updateProducts = async (id, data) => {
+    try {
+        console.log(EndPoints.PRODUCT + '/create-product/' + id)
+        console.log(id, data);
+        const response = await API.put(EndPoints.PRODUCT + '/update-product/' + id, data)
         console.log('response: ', response);
         return response;
     } catch (err) {
