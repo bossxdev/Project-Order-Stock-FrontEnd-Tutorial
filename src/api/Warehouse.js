@@ -1,8 +1,7 @@
 import API from 'api/Http'
 import * as EndPoints from 'api/EndPoints'
-import { HTTP_STATUS_CODE } from 'utils/constants'
 
-export const warehouse = async (data) => {
+export const warehouse = async () => {
     try {
         const response = await API.get(EndPoints.WAREHOUSE)
         return response;
