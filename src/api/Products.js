@@ -24,11 +24,19 @@ export const createProducts = async (data) => {
 
 export const updateProducts = async (id, data) => {
     try {
-        console.log(EndPoints.PRODUCT + '/create-product/' + id)
-        console.log(id, data);
         const response = await API.put(EndPoints.PRODUCT + '/update-product/' + id, data)
-        console.log('response: ', response);
         return response;
+    } catch (err) {
+        console.log(err);
+        return err;
+    }
+}
+
+export const productsById = async (id) => {
+    try {
+        const response = await API.get(EndPoints.PRODUCT + '/productByWarehouseId/' + id)
+        console.log('response.data:', response.data);
+        return response.data;
     } catch (err) {
         console.log(err);
         return err;
