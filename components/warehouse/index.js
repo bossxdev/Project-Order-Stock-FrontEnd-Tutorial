@@ -72,7 +72,10 @@ export default function WarehousePage() {
 
     const handleMenuClick = (e) => {
         if (e.key === '1') {
-            router.push('/shelf');
+            router.push({
+                pathname: '/shelf',
+                query: {warehouseId: String(warehouseList.map((wh) => (wh._id)))}
+            });
         }
         if (e.key === '2') {
             router.push('/export');
@@ -80,7 +83,8 @@ export default function WarehousePage() {
     };
 
     const handleWarehouseSelect = (value) => {
-        setSelectedWarehouse(value);
+        const { warehouseId, warehouseName } = JSON.parse(value);
+        setSelectedWarehouse({ warehouseId, warehouseName });
     };
 
     const handleProductSelect = (record, selected) => {
@@ -93,7 +97,7 @@ export default function WarehousePage() {
     const handleUpdateProducts = async () => {
         if (selectedWarehouse && selectedProducts.length > 0) {
             for (const productId of selectedProducts) {
-                await updateProducts(productId, { warehouseName: selectedWarehouse });
+                await updateProducts(productId, {warehouse: selectedWarehouse});
             }
             // Refresh the products data
             const productsResponse = await products();
@@ -228,7 +232,9 @@ export default function WarehousePage() {
                     style={{ width: '100%' }}
                 >
                     {warehouseList.map((wh) => (
-                        <Option key={wh.id} value={wh.warehouseName}>{wh.warehouseName}</Option>
+                        <Option key={wh.id} value={JSON.stringify({ warehouseId: wh._id, warehouseName: wh.warehouseName })}>
+                            {wh.warehouseName}
+                        </Option>
                     ))}
                 </Select>
                 <p>ยืนยันที่จะเพิ่มสินค้าในคลังสินค้าหรือไม่?</p>
