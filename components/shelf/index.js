@@ -109,7 +109,7 @@ export default function ShelfPage({ warehouseId }) {
     const handleOk = () => {};
 
     const handleCancel = () => {
-        setIsModalVisible(false);
+        router.push('/warehouse');
     };
 
     if (!warehouseData) {
