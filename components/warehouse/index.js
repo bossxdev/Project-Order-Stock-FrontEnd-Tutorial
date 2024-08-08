@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Tabs, Button, Dropdown, Menu, Checkbox, Modal } from 'antd';
+import { Table, Tabs, Button, Dropdown, Menu, Checkbox, Modal, Select } from 'antd';
 import CreateProductModal from 'components/product';
 import { useRouter } from "next/router";
-import { products } from 'api/Products'; // Adjust the import path according to your project structure
+import { products, createProducts, updateProducts } from 'api/Products'; // Adjust the import path according to your project structure
 import { warehouse } from 'api/Warehouse'; // Adjust the import path according to your project structure
+
+const { Option } = Select;
 
 // Helper function to format date
 const formatDate = (dateString) => {
@@ -16,10 +18,10 @@ export default function WarehousePage() {
     const [currentTab, setCurrentTab] = useState('1');
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [isPromptVisible, setIsPromptVisible] = useState(false);
-    const [dataSources, setDataSources] = useState({
-        1: [],
-        2: []
-    });
+    const [dataSources, setDataSources] = useState({ 1: [], 2: [] });
+    const [warehouseList, setWarehouseList] = useState([]);
+    const [selectedWarehouse, setSelectedWarehouse] = useState(null);
+    const [selectedProducts, setSelectedProducts] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
@@ -29,13 +31,8 @@ export default function WarehousePage() {
             try {
                 const warehouseResponse = await warehouse();
                 const productsResponse = await products();
-                // Assuming response.data contains the products and warehouse arrays
-                console.log('Warehouse:', warehouseResponse.data);
-                console.log('Products:', productsResponse.data);
-                setDataSources({
-                    1: warehouseResponse.data,
-                    2: productsResponse.data
-                });
+                setDataSources({ 1: warehouseResponse.data, 2: productsResponse.data });
+                setWarehouseList(warehouseResponse.data);
             } catch (error) {
                 setError(error);
             } finally {
@@ -61,7 +58,6 @@ export default function WarehousePage() {
         try {
             await createProducts(values);
             setIsModalVisible(false);
-            // Re-fetch the data to update the table
             const productsResponse = await products();
             setDataSources((prev) => ({ ...prev, 2: productsResponse.data }));
         } catch (error) {
@@ -80,6 +76,32 @@ export default function WarehousePage() {
         }
         if (e.key === '2') {
             router.push('/export');
+        }
+    };
+
+    const handleWarehouseSelect = (value) => {
+        setSelectedWarehouse(value);
+    };
+
+    const handleProductSelect = (record, selected) => {
+        const newSelectedProducts = selected
+            ? [...selectedProducts, record._id]
+            : selectedProducts.filter(id => id !== record._id);
+        setSelectedProducts(newSelectedProducts);
+    };
+
+    const handleUpdateProducts = async () => {
+        if (selectedWarehouse && selectedProducts.length > 0) {
+            for (const productId of selectedProducts) {
+                await updateProducts(productId, { warehouseName: selectedWarehouse });
+            }
+            // Refresh the products data
+            const productsResponse = await products();
+            setDataSources((prev) => ({ ...prev, 2: productsResponse.data }));
+            setSelectedProducts([]);
+            setIsPromptVisible(false);
+        } else {
+            console.log('Please select products and a warehouse');
         }
     };
 
@@ -136,7 +158,9 @@ export default function WarehousePage() {
             title: '',
             dataIndex: 'select',
             key: 'select',
-            render: () => <Checkbox />,
+            render: (text, record) => (
+                <Checkbox onChange={(e) => handleProductSelect(record, e.target.checked)} />
+            ),
         },
         {
             title: 'ชื่อสินค้า',
@@ -150,8 +174,8 @@ export default function WarehousePage() {
         },
         {
             title: 'อ้างอิง',
-            dataIndex: 'ref',
-            key: 'ref'
+            dataIndex: 'warehouseName',
+            key: 'warehouseName'
         },
         {
             title: 'จำนวน',
@@ -195,9 +219,18 @@ export default function WarehousePage() {
             <Modal
                 title="เพิ่มสินค้า"
                 visible={isPromptVisible}
-                onOk={() => console.log('Product added!')}
+                onOk={handleUpdateProducts}
                 onCancel={handleCancel}
             >
+                <Select
+                    placeholder="เลือกคลังสินค้า"
+                    onChange={handleWarehouseSelect}
+                    style={{ width: '100%' }}
+                >
+                    {warehouseList.map((wh) => (
+                        <Option key={wh.id} value={wh.warehouseName}>{wh.warehouseName}</Option>
+                    ))}
+                </Select>
                 <p>ยืนยันที่จะเพิ่มสินค้าในคลังสินค้าหรือไม่?</p>
             </Modal>
             <CreateProductModal
