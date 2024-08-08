@@ -121,7 +121,7 @@ export default function ShelfPage({ warehouseId }) {
             <Card title="รายละเอียดคลังสินค้า" style={{ marginBottom: 16 }}>
                 <div><strong>ชื่อคลังสินค้า:</strong> {warehouseData.warehouseName}</div>
                 <div><strong>วันที่สร้าง:</strong> {formatDate(warehouseData.createdAt)}</div>
-                <div><strong>สถานะคลังสินค้า:</strong>
+                <div><strong>สถานะคลังสินค้า: </strong>
                     <span style={{ color: warehouseData.status === 'Open' ? 'darkblue' : warehouseData.status === 'Closed' ? 'red' : 'inherit' }}>
                         {warehouseData.status}
                     </span>
