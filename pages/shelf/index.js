@@ -5,6 +5,7 @@ import ShelfPage from "components/shelf";
 
 export default function Shelf() {
     const router = useRouter();
+    const { warehouseId } = router.query;
 
     useEffect(() => {
         const token = Cookies.get('token');
@@ -15,7 +16,7 @@ export default function Shelf() {
 
     return (
         <>
-            <ShelfPage/>
+            {warehouseId && <ShelfPage warehouseId={warehouseId} />}
         </>
     );
 }
