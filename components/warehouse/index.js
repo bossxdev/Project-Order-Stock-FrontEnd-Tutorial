@@ -231,11 +231,21 @@ export default function WarehousePage() {
                     onChange={handleWarehouseSelect}
                     style={{ width: '100%' }}
                 >
-                    {warehouseList.map((wh) => (
-                        <Option key={wh.id} value={JSON.stringify({ warehouseId: wh._id, warehouseName: wh.warehouseName })}>
-                            {wh.warehouseName}
-                        </Option>
-                    ))}
+                    {warehouseList.length > 0 ? (
+                        warehouseList.map((wh) => (
+                            <Option
+                                key={wh.id}
+                                value={JSON.stringify({
+                                    warehouseId: wh._id,
+                                    warehouseName: wh.warehouseName,
+                                })}
+                            >
+                                {wh.warehouseName}
+                            </Option>
+                        ))
+                    ) : (
+                        <Option disabled>No warehouses available</Option>
+                    )}
                 </Select>
                 <p>ยืนยันที่จะเพิ่มสินค้าในคลังสินค้าหรือไม่?</p>
             </Modal>
