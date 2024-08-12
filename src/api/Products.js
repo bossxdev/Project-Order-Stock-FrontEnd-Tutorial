@@ -35,7 +35,6 @@ export const updateProducts = async (id, data) => {
 export const productsById = async (id) => {
     try {
         const response = await API.get(EndPoints.PRODUCT + '/productByWarehouseId/' + id)
-        console.log('response.data:', response.data);
         return response.data;
     } catch (err) {
         console.log(err);
