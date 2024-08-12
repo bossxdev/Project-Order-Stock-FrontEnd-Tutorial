@@ -85,10 +85,8 @@ export default function ShelfPage({ warehouseId }) {
         setIsModalVisible(true);
     };
 
-    const handleOk = () => {};
-
     const handleCancel = () => {
-        router.push('/warehouse');
+        setIsModalVisible(false);
     };
 
     if (!warehouseData) {
@@ -138,10 +136,11 @@ export default function ShelfPage({ warehouseId }) {
             </div>
             <Modal
                 visible={isModalVisible}
-                onOk={handleOk}
                 onCancel={handleCancel}
+                cancelText="ปิด"
                 closable={false}
                 width={800}
+                okButtonProps={{ style: { display: 'none' } }}
             >
                 {modalContent && (
                     <div>
