@@ -231,7 +231,7 @@ export default function WarehousePage() {
                     onChange={handleWarehouseSelect}
                     style={{ width: '100%' }}
                 >
-                    {warehouseList.length > 0 ? (
+                    {Array.isArray(warehouseList) && warehouseList.length > 0 ? (
                         warehouseList.map((wh) => (
                             <Option
                                 key={wh.id}
