@@ -4,7 +4,7 @@ import * as EndPoints from 'api/EndPoints'
 export const shelf = async () => {
     try {
         const response = await API.get(EndPoints.SHELF)
-        return response;
+        return response.data;
     } catch (err) {
         console.log(err);
         return err;
