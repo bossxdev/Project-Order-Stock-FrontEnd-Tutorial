@@ -93,7 +93,7 @@ export default function ShelfPage({ warehouseId }) {
             shelfName: record.shelfName,
             createdAt: formatDate(record.createdAt),
             status: record.status,
-            products: matchingProducts, // Include matching products in modal content
+            products: matchingProducts,
         });
         setIsModalVisible(true);
     };
@@ -110,6 +110,15 @@ export default function ShelfPage({ warehouseId }) {
                 const productId = productData[i]._id;
                 const selectedShelfId = selectedShelfIds[i];
                 updateResponse = await updateProducts(productId, { shelfId: selectedShelfId });
+
+                // Update the productData state with the new shelfId
+                if (updateResponse) {
+                    setProductData(prevProductData =>
+                        prevProductData.map(product =>
+                            product._id === productId ? { ...product, shelfId: selectedShelfId } : product
+                        )
+                    );
+                }
             }
 
             if (updateResponse) {
