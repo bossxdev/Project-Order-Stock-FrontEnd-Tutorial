@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Card, Radio, Button, Modal } from 'antd';
+import { Table, Card, Radio, Button, Modal, message } from 'antd';
 import { useRouter } from 'next/router';
 import { warehouseById } from 'api/Warehouse';
-import { productsById } from 'api/Products';
+import { productsById, updateProducts } from 'api/Products';
 import { shelf } from 'api/Shelf';  // Import the shelf function
 
 const columns = [
@@ -19,8 +19,8 @@ const productColumns = (selectedRadio, setSelectedRadio, showModal) => [
         render: (_, record) => (
             <div>
                 <Radio
-                    checked={selectedRadio === record.key}
-                    onChange={() => setSelectedRadio(record.key)}  // Set the selected radio to the specific record key
+                    checked={selectedRadio === record._id}  // Use shelfId to match selectedRadio
+                    onChange={() => setSelectedRadio(record._id)}  // Set the selected shelfId
                     style={{ marginRight: 8 }}
                 />
                 <span onClick={() => showModal(record.key)} style={{ cursor: 'pointer' }}>
@@ -31,8 +31,12 @@ const productColumns = (selectedRadio, setSelectedRadio, showModal) => [
     }
 ];
 
-const ProductDetailsTable = ({ product, showModal }) => {
+const ProductDetailsTable = ({ product, showModal, setSelectedShelfId }) => {
     const [selectedRadio, setSelectedRadio] = useState(null);
+
+    useEffect(() => {
+        setSelectedShelfId(selectedRadio);  // Update the selected shelfId when the radio button changes
+    }, [selectedRadio]);
 
     return (
         <Table
@@ -58,6 +62,7 @@ export default function ShelfPage({ warehouseId }) {
     const [warehouseData, setWarehouseData] = useState(null);
     const [productData, setProductData] = useState([]);
     const [shelfData, setShelfData] = useState([]);
+    const [selectedShelfId, setSelectedShelfId] = useState(null);  // State to store the selected shelfId
 
     useEffect(() => {
         const fetchWarehouseData = async () => {
@@ -89,6 +94,20 @@ export default function ShelfPage({ warehouseId }) {
         setIsModalVisible(false);
     };
 
+    const handleSave = async () => {
+        if (selectedShelfId && productData.length > 0) {
+            const productId = productData[0]._id;  // Assuming you're updating the first product or modify as needed
+            const updateResponse = await updateProducts(productId, { shelfId: selectedShelfId });
+
+            if (updateResponse) {
+                message.success("บันทึกข้อมูลชั้นวางสำเร็จ!");
+                // You can add additional logic here, such as refreshing the data or showing a success message
+            } else {
+                message.error("บันทึกข้อมูลชั้นวางไม่สำเร็จ");
+            }
+        }
+    };
+
     if (!warehouseData) {
         return <div>Loading...</div>;
     }
@@ -104,6 +123,7 @@ export default function ShelfPage({ warehouseId }) {
                     </span>
                 </div>
             </Card>
+
             <Table
                 columns={columns}
                 dataSource={productData}
@@ -115,12 +135,13 @@ export default function ShelfPage({ warehouseId }) {
                                 shelfData.length > 0
                                     ? shelfData.map(detail => ({
                                         ...detail,
-                                        key: detail.shelfId, // Ensure a unique key for each record
+                                        key: detail._id, // Ensure a unique key for each record
                                         shelfName: detail.shelfName
                                     }))
                                     : []
                             }
                             showModal={showModal}
+                            setSelectedShelfId={setSelectedShelfId}  // Pass the setSelectedShelfId function
                         />
                     ),
                     expandIcon: () => null,
@@ -132,8 +153,9 @@ export default function ShelfPage({ warehouseId }) {
 
             <div style={{ position: 'fixed', bottom: 16, right: 16 }}>
                 <Button type="default" style={{ marginRight: 8 }} onClick={handleCancel}>ยกเลิก</Button>
-                <Button type="primary">บันทึก</Button>
+                <Button type="primary" onClick={handleSave}>บันทึก</Button>
             </div>
+
             <Modal
                 visible={isModalVisible}
                 onCancel={handleCancel}
