@@ -8,20 +8,20 @@ import { shelf } from 'api/Shelf';
 const columns = [
     { title: 'รายการ', dataIndex: 'productName', key: 'productName' },
     { title: 'รหัสสินค้า', dataIndex: 'productId', key: 'productId' },
-    { title: 'ราคา/หน่วย (บาท)', dataIndex: 'pricePerUnit', key: 'pricePerUnit' },
-    { title: 'สถานะ', dataIndex: 'status', key: 'status' },
+    { title: 'ราคา/หน่วย (บาท)', dataIndex: 'price', key: 'price' },
     { title: 'ยอดรวม (ชิ้น)', dataIndex: 'quantity', key: 'quantity' }
 ];
 
-const productColumns = (selectedRadio, setSelectedRadio, showModal, index) => [
+const productColumns = (selectedRadio, setSelectedRadio, showModal, index, shelfId) => [
     {
         key: 'shelfName',
         render: (_, record) => (
             <div>
                 <Radio
-                    checked={selectedRadio === record._id}
+                    checked={selectedRadio === record._id || shelfId === record._id}
                     onChange={() => setSelectedRadio(record._id, index)}
                     style={{ marginRight: 8 }}
+                    disabled={shelfId === record._id} // Disable if another radio is already selected
                 />
                 <span onClick={() => showModal(record)} style={{ cursor: 'pointer' }}>
                     {record.shelfName}
@@ -31,8 +31,8 @@ const productColumns = (selectedRadio, setSelectedRadio, showModal, index) => [
     }
 ];
 
-const ProductDetailsTable = ({ product, showModal, selectedShelfIds, setSelectedShelfId, index }) => {
-    const [selectedRadio, setSelectedRadio] = useState(selectedShelfIds[index] || null);
+const ProductDetailsTable = ({ product, showModal, setSelectedShelfId, index, shelfId }) => {
+    const [selectedRadio, setSelectedRadio] = useState(shelfId || null);
 
     useEffect(() => {
         setSelectedShelfId(selectedRadio, index);
@@ -40,7 +40,7 @@ const ProductDetailsTable = ({ product, showModal, selectedShelfIds, setSelected
 
     return (
         <Table
-            columns={productColumns(selectedRadio, setSelectedRadio, showModal, index)}
+            columns={productColumns(selectedRadio, setSelectedRadio, showModal, index, shelfId)}
             dataSource={product}
             pagination={false}
             showHeader={false}
@@ -161,6 +161,7 @@ export default function ShelfPage({ warehouseId }) {
                             selectedShelfIds={selectedShelfIds}
                             setSelectedShelfId={setSelectedShelfId}
                             index={index}
+                            shelfId={record.shelfId}  // Pass shelfId to check against the radio selection
                         />
                     ),
                     expandIcon: () => null,
