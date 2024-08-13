@@ -99,8 +99,12 @@ export default function ShelfPage({ warehouseId }) {
     };
 
     const handleCancel = () => {
-        setIsModalVisible(false);
+        router.push('/warehouse');
     };
+
+    const handleModalCancel = () => {
+        setIsModalVisible(false);
+    }
 
     const handleSave = async () => {
         if (productData.length > 0) {
@@ -178,7 +182,7 @@ export default function ShelfPage({ warehouseId }) {
 
             <Modal
                 visible={isModalVisible}
-                onCancel={handleCancel}
+                onCancel={handleModalCancel}
                 cancelText="ปิด"
                 closable={false}
                 width={800}
