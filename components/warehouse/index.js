@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Tabs, Button, Dropdown, Menu, Checkbox, Modal, Select } from 'antd';
+import {Table, Tabs, Button, Dropdown, Menu, Checkbox, Modal, Select, Popconfirm, Image} from 'antd';
 import CreateProductModal from 'components/product';
 import { useRouter } from "next/router";
-import { products, createProducts, updateProducts } from 'api/Products'; // Adjust the import path according to your project structure
+import { products, createProducts, updateProducts, deleteProductById } from 'api/Products'; // Adjust the import path according to your project structure
 import { warehouse } from 'api/Warehouse'; // Adjust the import path according to your project structure
 
 const { Option } = Select;
@@ -157,6 +157,16 @@ export default function WarehousePage() {
         },
     ];
 
+    const handleDeleteProduct = async (id) => {
+        try {
+            await deleteProductById(id);
+            const productsResponse = await products();
+            setDataSources((prev) => ({ ...prev, 2: productsResponse.data }));
+        } catch (error) {
+            console.error('Error deleting product:', error);
+        }
+    };
+
     const createStockColumn = [
         {
             title: '',
@@ -186,6 +196,19 @@ export default function WarehousePage() {
             dataIndex: 'quantity',
             key: 'quantity'
         },
+        { dataIndex: 'delete', key: 'delete', render: (text, record) => (
+             <Popconfirm
+                title="คุณแน่ใจหรือไม่ว่าต้องการลบสินค้านี้?"
+                onConfirm={() => handleDeleteProduct(record._id)}
+                okText="ใช่"
+                cancelText="ไม่"
+             >
+                 <Button>
+                     <Image height={20} width={20} src="/bin.png" preview={false} alt="Bin Icon" />
+                     <p>ลบ</p>
+                 </Button>
+             </Popconfirm>
+        ), }
     ];
 
     if (loading) {
