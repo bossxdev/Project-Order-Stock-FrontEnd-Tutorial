@@ -42,6 +42,13 @@ export default function CreateProductModal({ visible, onCreate, onCancel }) {
                     <Input />
                 </Form.Item>
                 <Form.Item
+                    name="price"
+                    label="ราคา"
+                    rules={[{ required: true, message: 'กรุณาใส่ราคา!' }]}
+                >
+                    <Input type="number" />
+                </Form.Item>
+                <Form.Item
                     name="quantity"
                     label="จำนวน"
                     rules={[{ required: true, message: 'กรุณาใส่จำนวน!' }]}
