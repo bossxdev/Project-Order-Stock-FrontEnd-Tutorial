@@ -96,14 +96,14 @@ export default function ShelfPage({ warehouseId }) {
 
     const handleSave = async () => {
         if (selectedShelfId && productData.length > 0) {
-            const productId = productData[0]._id;  // Assuming you're updating the first product or modify as needed
-            const updateResponse = await updateProducts(productId, { shelfId: selectedShelfId });
-
-            if (updateResponse) {
-                message.success("บันทึกข้อมูลชั้นวางสำเร็จ!");
-                // You can add additional logic here, such as refreshing the data or showing a success message
-            } else {
-                message.error("บันทึกข้อมูลชั้นวางไม่สำเร็จ");
+            for (let i = 0; i < productData.length; i++) {
+                const productId = productData[i]._id;
+                const updateResponse = await updateProducts(productId, { shelfId: selectedShelfId });
+                if (updateResponse) {
+                    message.success("บันทึกข้อมูลชั้นวางสำเร็จ!");
+                } else {
+                    message.error("บันทึกข้อมูลชั้นวางไม่สำเร็จ");
+                }
             }
         }
     };
