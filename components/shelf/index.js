@@ -23,7 +23,7 @@ const productColumns = (selectedRadio, setSelectedRadio, showModal, index) => [
                     onChange={() => setSelectedRadio(record._id, index)}
                     style={{ marginRight: 8 }}
                 />
-                <span onClick={() => showModal(record.key)} style={{ cursor: 'pointer' }}>
+                <span onClick={() => showModal(record)} style={{ cursor: 'pointer' }}>
                     {record.shelfName}
                 </span>
             </div>
