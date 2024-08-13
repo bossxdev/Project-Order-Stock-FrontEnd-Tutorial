@@ -3,27 +3,27 @@ import { Table, Card, Radio, Button, Modal, message } from 'antd';
 import { useRouter } from 'next/router';
 import { warehouseById } from 'api/Warehouse';
 import { productsById, updateProducts } from 'api/Products';
-import { shelf } from 'api/Shelf';  // Import the shelf function
+import { shelf } from 'api/Shelf';
 
 const columns = [
     { title: 'รายการ', dataIndex: 'productName', key: 'productName' },
     { title: 'รหัสสินค้า', dataIndex: 'productId', key: 'productId' },
-    { title: 'ราคา/หน่วย (บาท)', dataIndex: 'pricePerUnit', key: 'pricePerUnit' },
-    { title: 'สถานะ', dataIndex: 'status', key: 'status' },
+    { title: 'ราคา/หน่วย (บาท)', dataIndex: 'price', key: 'price' },
     { title: 'ยอดรวม (ชิ้น)', dataIndex: 'quantity', key: 'quantity' }
 ];
 
-const productColumns = (selectedRadio, setSelectedRadio, showModal) => [
+const productColumns = (selectedRadio, setSelectedRadio, showModal, index, shelfId) => [
     {
         key: 'shelfName',
         render: (_, record) => (
             <div>
                 <Radio
-                    checked={selectedRadio === record._id}  // Use shelfId to match selectedRadio
-                    onChange={() => setSelectedRadio(record._id)}  // Set the selected shelfId
+                    checked={selectedRadio === record._id || shelfId === record._id}
+                    onChange={() => setSelectedRadio(record._id, index)}
                     style={{ marginRight: 8 }}
+                    disabled={shelfId === record._id} // Disable if another radio is already selected
                 />
-                <span onClick={() => showModal(record.key)} style={{ cursor: 'pointer' }}>
+                <span onClick={() => showModal(record)} style={{ cursor: 'pointer' }}>
                     {record.shelfName}
                 </span>
             </div>
@@ -31,16 +31,16 @@ const productColumns = (selectedRadio, setSelectedRadio, showModal) => [
     }
 ];
 
-const ProductDetailsTable = ({ product, showModal, setSelectedShelfId }) => {
-    const [selectedRadio, setSelectedRadio] = useState(null);
+const ProductDetailsTable = ({ product, showModal, setSelectedShelfId, index, shelfId }) => {
+    const [selectedRadio, setSelectedRadio] = useState(shelfId || null);
 
     useEffect(() => {
-        setSelectedShelfId(selectedRadio);  // Update the selected shelfId when the radio button changes
+        setSelectedShelfId(selectedRadio, index);
     }, [selectedRadio]);
 
     return (
         <Table
-            columns={productColumns(selectedRadio, setSelectedRadio, showModal)}
+            columns={productColumns(selectedRadio, setSelectedRadio, showModal, index, shelfId)}
             dataSource={product}
             pagination={false}
             showHeader={false}
@@ -52,7 +52,7 @@ const ProductDetailsTable = ({ product, showModal, setSelectedShelfId }) => {
 
 const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-CA'); // This format is YYYY-MM-DD
+    return date.toLocaleDateString('en-CA');
 };
 
 export default function ShelfPage({ warehouseId }) {
@@ -62,7 +62,7 @@ export default function ShelfPage({ warehouseId }) {
     const [warehouseData, setWarehouseData] = useState(null);
     const [productData, setProductData] = useState([]);
     const [shelfData, setShelfData] = useState([]);
-    const [selectedShelfId, setSelectedShelfId] = useState(null);  // State to store the selected shelfId
+    const [selectedShelfIds, setSelectedShelfIds] = useState({});
 
     useEffect(() => {
         const fetchWarehouseData = async () => {
@@ -85,27 +85,56 @@ export default function ShelfPage({ warehouseId }) {
         fetchShelfData();
     }, [warehouseId]);
 
-    const showModal = (id) => {
-        setModalContent(`Warehouse ID: ${id}`);
+    const showModal = (record) => {
+        // Filter products that match the selected shelfId
+        const matchingProducts = productData.filter(product => product.shelfId === record._id);
+
+        setModalContent({
+            shelfName: record.shelfName,
+            createdAt: formatDate(record.createdAt),
+            status: record.status,
+            products: matchingProducts,
+        });
         setIsModalVisible(true);
     };
 
     const handleCancel = () => {
-        setIsModalVisible(false);
+        router.push('/warehouse');
     };
 
+    const handleModalCancel = () => {
+        setIsModalVisible(false);
+    }
+
     const handleSave = async () => {
-        if (selectedShelfId && productData.length > 0) {
-            const productId = productData[0]._id;  // Assuming you're updating the first product or modify as needed
-            const updateResponse = await updateProducts(productId, { shelfId: selectedShelfId });
+        if (productData.length > 0) {
+            let updateResponse;
+
+            for (let i = 0; i < productData.length; i++) {
+                const productId = productData[i]._id;
+                const selectedShelfId = selectedShelfIds[i];
+                updateResponse = await updateProducts(productId, { shelfId: selectedShelfId });
+
+                // Update the productData state with the new shelfId
+                if (updateResponse) {
+                    setProductData(prevProductData =>
+                        prevProductData.map(product =>
+                            product._id === productId ? { ...product, shelfId: selectedShelfId } : product
+                        )
+                    );
+                }
+            }
 
             if (updateResponse) {
                 message.success("บันทึกข้อมูลชั้นวางสำเร็จ!");
-                // You can add additional logic here, such as refreshing the data or showing a success message
             } else {
                 message.error("บันทึกข้อมูลชั้นวางไม่สำเร็จ");
             }
         }
+    };
+
+    const setSelectedShelfId = (shelfId, index) => {
+        setSelectedShelfIds((prev) => ({ ...prev, [index]: shelfId }));
     };
 
     if (!warehouseData) {
@@ -129,19 +158,14 @@ export default function ShelfPage({ warehouseId }) {
                 dataSource={productData}
                 pagination={false}
                 expandable={{
-                    expandedRowRender: (record) => (
+                    expandedRowRender: (record, index) => (
                         <ProductDetailsTable
-                            product={
-                                shelfData.length > 0
-                                    ? shelfData.map(detail => ({
-                                        ...detail,
-                                        key: detail._id, // Ensure a unique key for each record
-                                        shelfName: detail.shelfName
-                                    }))
-                                    : []
-                            }
+                            product={shelfData.length > 0 ? shelfData.map(detail => ({ ...detail, key: detail._id, shelfName: detail.shelfName })) : []}
                             showModal={showModal}
-                            setSelectedShelfId={setSelectedShelfId}  // Pass the setSelectedShelfId function
+                            selectedShelfIds={selectedShelfIds}
+                            setSelectedShelfId={setSelectedShelfId}
+                            index={index}
+                            shelfId={record.shelfId}  // Pass shelfId to check against the radio selection
                         />
                     ),
                     expandIcon: () => null,
@@ -158,7 +182,7 @@ export default function ShelfPage({ warehouseId }) {
 
             <Modal
                 visible={isModalVisible}
-                onCancel={handleCancel}
+                onCancel={handleModalCancel}
                 cancelText="ปิด"
                 closable={false}
                 width={800}
@@ -167,12 +191,21 @@ export default function ShelfPage({ warehouseId }) {
                 {modalContent && (
                     <div>
                         <Card title="รายละเอียดชั้นวาง" style={{ marginBottom: 16 }}>
-                            <div><strong>ชื่อชั้นวาง:</strong> ชั้นวาง 1</div>
-                            <div><strong>วันที่สร้าง:</strong> 01/08/2024</div>
-                            <div><strong>สถานะคลังสินค้า:</strong> Open</div>
+                            <div><strong>ชื่อชั้นวาง:</strong> {modalContent.shelfName}</div>
+                            <div><strong>วันที่สร้าง:</strong> {modalContent.createdAt}</div>
+                            <div><strong>สถานะคลังสินค้า:</strong> {modalContent.status}</div>
                         </Card>
-                        <Card title="รายการสินค้า" style={{ marginBottom: 16 }} />
-                        <Card title="รายการนำออก" style={{ marginBottom: 16 }} />
+                        <Card title="รายการสินค้า" style={{ marginBottom: 16 }}>
+                            <Table
+                                columns={[
+                                    { title: 'ชื่อสินค้า', dataIndex: 'productName', key: 'productName' },
+                                    { title: 'จำนวน', dataIndex: 'quantity', key: 'quantity' }
+                                ]}
+                                dataSource={modalContent.products}
+                                pagination={false}
+                                size="small"
+                            />
+                        </Card>
                     </div>
                 )}
             </Modal>
