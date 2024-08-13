@@ -35,21 +35,21 @@ export default function CreateProductModal({ visible, onCreate, onCancel }) {
                     <Input />
                 </Form.Item>
                 <Form.Item
-                    name="productCode"
+                    name="productId"
                     label="รหัสสินค้า"
                     rules={[{ required: true, message: 'กรุณาใส่รหัสสินค้า!' }]}
                 >
                     <Input />
                 </Form.Item>
                 <Form.Item
-                    name="refer"
-                    label="อ้างอิง"
-                    rules={[{ required: true, message: 'กรุณาใส่อ้างอิง!' }]}
+                    name="price"
+                    label="ราคา"
+                    rules={[{ required: true, message: 'กรุณาใส่ราคา!' }]}
                 >
-                    <Input />
+                    <Input type="number" />
                 </Form.Item>
                 <Form.Item
-                    name="value"
+                    name="quantity"
                     label="จำนวน"
                     rules={[{ required: true, message: 'กรุณาใส่จำนวน!' }]}
                 >
