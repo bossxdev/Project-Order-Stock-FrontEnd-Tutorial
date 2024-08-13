@@ -3,7 +3,7 @@ import { Table, Card, Radio, Button, Modal, message } from 'antd';
 import { useRouter } from 'next/router';
 import { warehouseById } from 'api/Warehouse';
 import { productsById, updateProducts } from 'api/Products';
-import { shelf } from 'api/Shelf';  // Import the shelf function
+import { shelf } from 'api/Shelf';
 
 const columns = [
     { title: 'รายการ', dataIndex: 'productName', key: 'productName' },
@@ -85,8 +85,12 @@ export default function ShelfPage({ warehouseId }) {
         fetchShelfData();
     }, [warehouseId]);
 
-    const showModal = (id) => {
-        setModalContent(`Warehouse ID: ${id}`);
+    const showModal = (record) => {
+        setModalContent({
+            shelfName: record.shelfName,
+            createdAt: formatDate(record.createdAt),
+            status: record.status,
+        });
         setIsModalVisible(true);
     };
 
@@ -169,9 +173,9 @@ export default function ShelfPage({ warehouseId }) {
                 {modalContent && (
                     <div>
                         <Card title="รายละเอียดชั้นวาง" style={{ marginBottom: 16 }}>
-                            <div><strong>ชื่อชั้นวาง:</strong> ชั้นวาง 1</div>
-                            <div><strong>วันที่สร้าง:</strong> 01/08/2024</div>
-                            <div><strong>สถานะคลังสินค้า:</strong> Open</div>
+                            <div><strong>ชื่อชั้นวาง:</strong> {modalContent.shelfName}</div>
+                            <div><strong>วันที่สร้าง:</strong> {modalContent.createdAt}</div>
+                            <div><strong>สถานะคลังสินค้า:</strong> {modalContent.status}</div>
                         </Card>
                         <Card title="รายการสินค้า" style={{ marginBottom: 16 }} />
                         <Card title="รายการนำออก" style={{ marginBottom: 16 }} />
