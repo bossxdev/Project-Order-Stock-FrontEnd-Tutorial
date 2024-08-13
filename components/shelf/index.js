@@ -13,14 +13,14 @@ const columns = [
     { title: 'ยอดรวม (ชิ้น)', dataIndex: 'quantity', key: 'quantity' }
 ];
 
-const productColumns = (selectedRadio, setSelectedRadio, showModal) => [
+const productColumns = (selectedRadio, setSelectedRadio, showModal, index) => [
     {
         key: 'shelfName',
         render: (_, record) => (
             <div>
                 <Radio
-                    checked={selectedRadio === record._id}  // Use shelfId to match selectedRadio
-                    onChange={() => setSelectedRadio(record._id)}  // Set the selected shelfId
+                    checked={selectedRadio === record._id}
+                    onChange={() => setSelectedRadio(record._id, index)}
                     style={{ marginRight: 8 }}
                 />
                 <span onClick={() => showModal(record.key)} style={{ cursor: 'pointer' }}>
@@ -31,16 +31,16 @@ const productColumns = (selectedRadio, setSelectedRadio, showModal) => [
     }
 ];
 
-const ProductDetailsTable = ({ product, showModal, setSelectedShelfId }) => {
-    const [selectedRadio, setSelectedRadio] = useState(null);
+const ProductDetailsTable = ({ product, showModal, selectedShelfIds, setSelectedShelfId, index }) => {
+    const [selectedRadio, setSelectedRadio] = useState(selectedShelfIds[index] || null);
 
     useEffect(() => {
-        setSelectedShelfId(selectedRadio);  // Update the selected shelfId when the radio button changes
+        setSelectedShelfId(selectedRadio, index);
     }, [selectedRadio]);
 
     return (
         <Table
-            columns={productColumns(selectedRadio, setSelectedRadio, showModal)}
+            columns={productColumns(selectedRadio, setSelectedRadio, showModal, index)}
             dataSource={product}
             pagination={false}
             showHeader={false}
@@ -52,7 +52,7 @@ const ProductDetailsTable = ({ product, showModal, setSelectedShelfId }) => {
 
 const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-CA'); // This format is YYYY-MM-DD
+    return date.toLocaleDateString('en-CA');
 };
 
 export default function ShelfPage({ warehouseId }) {
@@ -62,7 +62,7 @@ export default function ShelfPage({ warehouseId }) {
     const [warehouseData, setWarehouseData] = useState(null);
     const [productData, setProductData] = useState([]);
     const [shelfData, setShelfData] = useState([]);
-    const [selectedShelfId, setSelectedShelfId] = useState(null);  // State to store the selected shelfId
+    const [selectedShelfIds, setSelectedShelfIds] = useState({});
 
     useEffect(() => {
         const fetchWarehouseData = async () => {
@@ -95,17 +95,25 @@ export default function ShelfPage({ warehouseId }) {
     };
 
     const handleSave = async () => {
-        if (selectedShelfId && productData.length > 0) {
+        if (productData.length > 0) {
+            let updateResponse;
+
             for (let i = 0; i < productData.length; i++) {
                 const productId = productData[i]._id;
-                const updateResponse = await updateProducts(productId, { shelfId: selectedShelfId });
-                if (updateResponse) {
-                    message.success("บันทึกข้อมูลชั้นวางสำเร็จ!");
-                } else {
-                    message.error("บันทึกข้อมูลชั้นวางไม่สำเร็จ");
-                }
+                const selectedShelfId = selectedShelfIds[i];
+                updateResponse = await updateProducts(productId, { shelfId: selectedShelfId });
+            }
+
+            if (updateResponse) {
+                message.success("บันทึกข้อมูลชั้นวางสำเร็จ!");
+            } else {
+                message.error("บันทึกข้อมูลชั้นวางไม่สำเร็จ");
             }
         }
+    };
+
+    const setSelectedShelfId = (shelfId, index) => {
+        setSelectedShelfIds((prev) => ({ ...prev, [index]: shelfId }));
     };
 
     if (!warehouseData) {
@@ -129,19 +137,13 @@ export default function ShelfPage({ warehouseId }) {
                 dataSource={productData}
                 pagination={false}
                 expandable={{
-                    expandedRowRender: (record) => (
+                    expandedRowRender: (record, index) => (
                         <ProductDetailsTable
-                            product={
-                                shelfData.length > 0
-                                    ? shelfData.map(detail => ({
-                                        ...detail,
-                                        key: detail._id, // Ensure a unique key for each record
-                                        shelfName: detail.shelfName
-                                    }))
-                                    : []
-                            }
+                            product={shelfData.length > 0 ? shelfData.map(detail => ({ ...detail, key: detail._id, shelfName: detail.shelfName })) : []}
                             showModal={showModal}
-                            setSelectedShelfId={setSelectedShelfId}  // Pass the setSelectedShelfId function
+                            selectedShelfIds={selectedShelfIds}
+                            setSelectedShelfId={setSelectedShelfId}
+                            index={index}
                         />
                     ),
                     expandIcon: () => null,
