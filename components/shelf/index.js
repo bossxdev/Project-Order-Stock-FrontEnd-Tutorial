@@ -86,10 +86,14 @@ export default function ShelfPage({ warehouseId }) {
     }, [warehouseId]);
 
     const showModal = (record) => {
+        // Filter products that match the selected shelfId
+        const matchingProducts = productData.filter(product => product.shelfId === record._id);
+
         setModalContent({
             shelfName: record.shelfName,
             createdAt: formatDate(record.createdAt),
             status: record.status,
+            products: matchingProducts, // Include matching products in modal content
         });
         setIsModalVisible(true);
     };
@@ -177,8 +181,17 @@ export default function ShelfPage({ warehouseId }) {
                             <div><strong>วันที่สร้าง:</strong> {modalContent.createdAt}</div>
                             <div><strong>สถานะคลังสินค้า:</strong> {modalContent.status}</div>
                         </Card>
-                        <Card title="รายการสินค้า" style={{ marginBottom: 16 }} />
-                        <Card title="รายการนำออก" style={{ marginBottom: 16 }} />
+                        <Card title="รายการสินค้า" style={{ marginBottom: 16 }}>
+                            <Table
+                                columns={[
+                                    { title: 'ชื่อสินค้า', dataIndex: 'productName', key: 'productName' },
+                                    { title: 'จำนวน', dataIndex: 'quantity', key: 'quantity' }
+                                ]}
+                                dataSource={modalContent.products}
+                                pagination={false}
+                                size="small"
+                            />
+                        </Card>
                     </div>
                 )}
             </Modal>
