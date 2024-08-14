@@ -78,7 +78,10 @@ export default function WarehousePage() {
             });
         }
         if (e.key === '2') {
-            router.push('/export');
+            router.push({
+                pathname: '/export',
+                query: {warehouseId: String(warehouseList.map((wh) => (wh._id)))}
+            });
         }
     };
 
