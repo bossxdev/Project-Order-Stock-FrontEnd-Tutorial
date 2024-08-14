@@ -111,7 +111,7 @@ export default function WarehousePage() {
 
     const menu = (
         <Menu onClick={handleMenuClick}>
-            <Menu.Item key="1">แก้ไข</Menu.Item>
+            <Menu.Item key="1">ดู/แก้ไข</Menu.Item>
             <Menu.Item key="2">ใบนำออก</Menu.Item>
         </Menu>
     );
