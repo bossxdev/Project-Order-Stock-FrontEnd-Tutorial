@@ -38,14 +38,14 @@ export default function EditModal({ visible, onCreate, onCancel, productName, pr
                     label="ชื่อสินค้า"
                     rules={[{ required: true, message: 'กรุณาใส่ชื่อสินค้า!' }]}
                 >
-                    <Input />
+                    <Input disabled />
                 </Form.Item>
                 <Form.Item
                     name="productId"
                     label="รหัสสินค้า"
                     rules={[{ required: true, message: 'กรุณาใส่รหัสสินค้า!' }]}
                 >
-                    <Input />
+                    <Input disabled />
                 </Form.Item>
                 <Form.Item
                     name="price"

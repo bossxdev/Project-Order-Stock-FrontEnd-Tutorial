@@ -70,12 +70,13 @@ export default function WarehousePage() {
 
     const handleEdit = async (values) => {
         try {
-            await createProducts(values);
-            setIsModalVisible(false);
+            const id = editProduct.id;
+            await updateProducts(id, values);
+            setIsEditModalVisible(false);
             const productsResponse = await products();
             setDataSources((prev) => ({ ...prev, 2: productsResponse.data }));
         } catch (error) {
-            console.error('Error creating product:', error);
+            console.error('Error updating product:', error);
         }
     };
 
@@ -112,8 +113,8 @@ export default function WarehousePage() {
     };
 
     const handleProductNameSelect = (record) => {
-        setEditProduct({ productName: record.productName, productId: record.productId });
-        setIsEditModalVisible(true);  // Show the EditModal
+        setEditProduct({ id: record._id, productName: record.productName, productId: record.productId });
+        setIsEditModalVisible(true);
     };
 
     const handleUpdateProducts = async () => {
