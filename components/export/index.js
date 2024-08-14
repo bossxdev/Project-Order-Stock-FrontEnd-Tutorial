@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Card, Button, Checkbox, Input } from 'antd';
 import { useRouter } from "next/router";
-import { warehouseById } from 'api/Warehouse'; // Make sure to replace with the actual path
+import { warehouseById } from 'api/Warehouse';
+import { productsById } from 'api/Products'; // Make sure to replace with the actual path
 
 const { TextArea } = Input;
 
@@ -14,10 +15,11 @@ export default function ExportPage({ warehouseId }) {
     const router = useRouter();
     const [selectedKeys, setSelectedKeys] = useState([]);
     const [warehouseData, setWarehouseData] = useState({ warehouseName: '', createdAt: '', status: '' });
+    const [productsData, setProductsData] = useState([]);
 
     useEffect(() => {
         const fetchWarehouseData = async () => {
-            const data = await warehouseById(warehouseId); // Assuming you are passing the warehouse ID via URL query
+            const data = await warehouseById(warehouseId);
             setWarehouseData({
                 warehouseName: data.warehouseName,
                 createdAt: data.createdAt,
@@ -25,7 +27,20 @@ export default function ExportPage({ warehouseId }) {
             });
         };
 
+        const fetchProductsData = async () => {
+            const data = await productsById(warehouseId);
+            setProductsData(data.map((product, index) => ({
+                key: String(index + 1),
+                sequence: index + 1,
+                productName: product.productName,
+                quantity: product.quantity,
+                outQuantity: product.outQuantity || 0,
+                totalQuantity: product.quantity - (product.outQuantity || 0),
+            })));
+        };
+
         fetchWarehouseData();
+        fetchProductsData();
     }, [warehouseId]);
 
     const handleCancel = () => {
@@ -66,26 +81,7 @@ export default function ExportPage({ warehouseId }) {
         }
     ];
 
-    const data = [
-        {
-            key: '1',
-            sequence: 1,
-            productName: 'Product A',
-            quantity: 200,
-            outQuantity: 100,
-            totalQuantity: 100,
-        },
-        {
-            key: '2',
-            sequence: 2,
-            productName: 'Product B',
-            quantity: 100,
-            outQuantity: 50,
-            totalQuantity: 50,
-        }
-    ];
-
-    const totalQuantity = data.reduce((total, record) => {
+    const totalQuantity = productsData.reduce((total, record) => {
         if (selectedKeys.includes(record.key)) {
             return total + record.totalQuantity;
         }
@@ -109,11 +105,11 @@ export default function ExportPage({ warehouseId }) {
                 <div><strong>วันที่สร้าง:</strong> {formatDate(warehouseData.createdAt)}</div>
                 <div><strong>สถานะคลังสินค้า: </strong>
                     <span style={{ color: warehouseData.status === 'Open' ? 'darkblue' : warehouseData.status === 'Closed' ? 'red' : 'inherit' }}>
-                                    {warehouseData.status}
-                                </span>
+                        {warehouseData.status}
+                    </span>
                 </div>
             </Card>
-            <Table columns={columns} dataSource={data} pagination={false} style={{ marginTop: 16 }} summary={summaryRow} />
+            <Table columns={columns} dataSource={productsData} pagination={false} style={{ marginTop: 16 }} summary={summaryRow} />
             <div style={{ position: 'fixed', bottom: 16, right: 16 }}>
                 <Button type="default" style={{ marginRight: 8 }} onClick={handleCancel}>ยกเลิก</Button>
                 <Button type="primary">บันทึก</Button>
