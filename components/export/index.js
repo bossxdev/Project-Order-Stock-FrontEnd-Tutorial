@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Card, Button, Checkbox, Input } from 'antd';
+import { Table, Card, Button, Checkbox, Input, InputNumber } from 'antd';
 import { useRouter } from "next/router";
 import { warehouseById } from 'api/Warehouse';
 import { productsById } from 'api/Products'; // Make sure to replace with the actual path
@@ -58,6 +58,19 @@ export default function ExportPage({ warehouseId }) {
         });
     };
 
+    const handleOutQuantityChange = (value, key) => {
+        setProductsData(prevData => prevData.map(item => {
+            if (item.key === key) {
+                return {
+                    ...item,
+                    outQuantity: value,
+                    totalQuantity: item.quantity - value,
+                };
+            }
+            return item;
+        }));
+    };
+
     const columns = [
         {
             title: 'ลำดับ',
@@ -71,7 +84,19 @@ export default function ExportPage({ warehouseId }) {
         },
         { title: 'ชื่อสินค้า', dataIndex: 'productName', key: 'productName' },
         { title: 'จำนวนสินค้า', dataIndex: 'quantity', key: 'quantity' },
-        { title: 'จำนวนสินค้านำออก', dataIndex: 'outQuantity', key: 'outQuantity' },
+        {
+            title: 'จำนวนสินค้านำออก',
+            dataIndex: 'outQuantity',
+            key: 'outQuantity',
+            render: (text, record) => (
+                <InputNumber
+                    min={0}
+                    max={record.quantity}
+                    value={record.outQuantity}
+                    onChange={(value) => handleOutQuantityChange(value, record.key)}
+                />
+            )
+        },
         { title: 'จำนวนสินค้าคงเหลือ', dataIndex: 'totalQuantity', key: 'totalQuantity' },
         {
             title: 'หมายเหตุ',
