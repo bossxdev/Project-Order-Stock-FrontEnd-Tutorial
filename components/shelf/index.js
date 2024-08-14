@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import { warehouseById } from 'api/Warehouse';
 import { productsById, updateProducts } from 'api/Products';
 import { shelf } from 'api/Shelf';
+import { exports } from 'api/Export';
 
 const columns = [
     { title: 'รายการ', dataIndex: 'productName', key: 'productName' },
@@ -63,6 +64,7 @@ export default function ShelfPage({ warehouseId }) {
     const [productData, setProductData] = useState([]);
     const [shelfData, setShelfData] = useState([]);
     const [selectedShelfIds, setSelectedShelfIds] = useState({});
+    const [exportData, setExportData] = useState([]);
 
     useEffect(() => {
         const fetchWarehouseData = async () => {
@@ -80,20 +82,31 @@ export default function ShelfPage({ warehouseId }) {
             setShelfData(Array.isArray(response) ? response : []);
         };
 
+        const fetchExportData = async () => {
+            const response = await exports();
+            setExportData(response);
+        };
+
         fetchWarehouseData();
         fetchProductData();
         fetchShelfData();
+        fetchExportData();
     }, [warehouseId]);
 
     const showModal = (record) => {
-        // Filter products that match the selected shelfId
         const matchingProducts = productData.filter(product => product.shelfId === record._id);
+
+        const formattedExports = exportData.map(exp => ({
+            ...exp,
+            createdAt: formatDate(exp.createdAt) // Format the createdAt date
+        }));
 
         setModalContent({
             shelfName: record.shelfName,
             createdAt: formatDate(record.createdAt),
             status: record.status,
             products: matchingProducts,
+            exports: formattedExports
         });
         setIsModalVisible(true);
     };
@@ -206,6 +219,17 @@ export default function ShelfPage({ warehouseId }) {
                                     { title: 'จำนวน', dataIndex: 'quantity', key: 'quantity' }
                                 ]}
                                 dataSource={modalContent.products}
+                                pagination={false}
+                                size="small"
+                            />
+                        </Card>
+                        <Card title="รายการนำออก" style={{ marginBottom: 16 }}>
+                            <Table
+                                columns={[
+                                    { title: 'รหัสใบนำออก', dataIndex: 'exportId', key: 'exportId' },
+                                    { title: 'วันที่สร้าง', dataIndex: 'createdAt', key: 'createdAt' }
+                                ]}
+                                dataSource={modalContent.exports}
                                 pagination={false}
                                 size="small"
                             />
