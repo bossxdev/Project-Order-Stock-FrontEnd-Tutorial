@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Form, Input, Modal } from "antd";
 
-export default function EditModal({ visible, onCreate, onCancel, productName, productId }) {
+export default function EditModal({ visible, onCreate, onCancel, productName, productId, price, quantity }) {
     const [form] = Form.useForm();
 
     useEffect(() => {
@@ -9,9 +9,11 @@ export default function EditModal({ visible, onCreate, onCancel, productName, pr
             form.setFieldsValue({
                 productName,
                 productId,
+                price,
+                quantity,
             });
         }
-    }, [visible, productName, productId, form]);
+    }, [visible, productName, productId, price, quantity, form]);
 
     return (
         <Modal
