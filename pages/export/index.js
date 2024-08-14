@@ -3,8 +3,9 @@ import {useRouter} from 'next/router';
 import Cookies from 'js-cookie';
 import ExportPage from "components/export"
 
-export default function Shelf() {
+export default function Export() {
     const router = useRouter();
+    const { warehouseId } = router.query;
 
     useEffect(() => {
         const token = Cookies.get('token');
@@ -15,7 +16,7 @@ export default function Shelf() {
 
     return (
         <>
-            <ExportPage/>
+            {warehouseId && <ExportPage warehouseId={warehouseId} />}
         </>
     );
 }

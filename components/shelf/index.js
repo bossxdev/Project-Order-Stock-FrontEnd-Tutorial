@@ -193,7 +193,11 @@ export default function ShelfPage({ warehouseId }) {
                         <Card title="รายละเอียดชั้นวาง" style={{ marginBottom: 16 }}>
                             <div><strong>ชื่อชั้นวาง:</strong> {modalContent.shelfName}</div>
                             <div><strong>วันที่สร้าง:</strong> {modalContent.createdAt}</div>
-                            <div><strong>สถานะคลังสินค้า:</strong> {modalContent.status}</div>
+                            <div><strong>สถานะคลังสินค้า: </strong>
+                                <span style={{ color: modalContent.status === 'Open' ? 'darkblue' : modalContent.status === 'Closed' ? 'red' : 'inherit' }}>
+                                    {modalContent.status}
+                                </span>
+                            </div>
                         </Card>
                         <Card title="รายการสินค้า" style={{ marginBottom: 16 }}>
                             <Table
