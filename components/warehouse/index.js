@@ -23,7 +23,7 @@ export default function WarehousePage() {
     const [warehouseList, setWarehouseList] = useState([]);
     const [selectedWarehouse, setSelectedWarehouse] = useState(null);
     const [selectedProducts, setSelectedProducts] = useState([]);
-    const [editProduct, setEditProduct] = useState({ productName: '', productId: '' });
+    const [editProduct, setEditProduct] = useState({ productName: '', productId: '', price: '', quantity: '' });
     const [isEditModalVisible, setIsEditModalVisible] = useState(false);  // Separate state for EditModal
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -113,7 +113,7 @@ export default function WarehousePage() {
     };
 
     const handleProductNameSelect = (record) => {
-        setEditProduct({ id: record._id, productName: record.productName, productId: record.productId });
+        setEditProduct({ id: record._id, productName: record.productName, productId: record.productId, price: record.price, quantity: record.quantity });
         setIsEditModalVisible(true);
     };
 
@@ -311,6 +311,8 @@ export default function WarehousePage() {
                 onCancel={() => setIsEditModalVisible(false)}
                 productName={editProduct.productName}
                 productId={editProduct.productId}
+                price={editProduct.price}
+                quantity={editProduct.quantity}
             />
         </>
     );
