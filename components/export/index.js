@@ -104,13 +104,7 @@ export default function ExportPage({ warehouseId }) {
                 />
             )
         },
-        { title: 'จำนวนสินค้าคงเหลือ', dataIndex: 'totalQuantity', key: 'totalQuantity' },
-        {
-            title: 'หมายเหตุ',
-            dataIndex: 'note',
-            key: 'note',
-            render: () => <TextArea rows={1} />
-        }
+        { title: 'จำนวนสินค้าคงเหลือ', dataIndex: 'totalQuantity', key: 'totalQuantity' }
     ];
 
     const totalQuantity = productsData.reduce((total, record) => {
@@ -122,7 +116,7 @@ export default function ExportPage({ warehouseId }) {
 
     const summaryRow = () => (
         <Table.Summary.Row>
-            <Table.Summary.Cell colSpan={5} />
+            <Table.Summary.Cell colSpan={3} />
             <Table.Summary.Cell>
                 <strong>ยอดรวมสุทธิ:</strong>
             </Table.Summary.Cell>
