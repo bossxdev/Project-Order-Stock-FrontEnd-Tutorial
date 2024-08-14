@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {Table, Tabs, Button, Dropdown, Menu, Checkbox, Modal, Select, Popconfirm, Image} from 'antd';
-import CreateProductModal from 'components/product';
+import CreateModal from 'components/product/modal/createModal';
+import EditModal from 'components/product/modal/editModal';
 import { useRouter } from "next/router";
 import { products, createProducts, updateProducts, deleteProductById } from 'api/Products'; // Adjust the import path according to your project structure
 import { warehouse } from 'api/Warehouse'; // Adjust the import path according to your project structure
@@ -22,6 +23,8 @@ export default function WarehousePage() {
     const [warehouseList, setWarehouseList] = useState([]);
     const [selectedWarehouse, setSelectedWarehouse] = useState(null);
     const [selectedProducts, setSelectedProducts] = useState([]);
+    const [editProduct, setEditProduct] = useState({ productName: '', productId: '' });
+    const [isEditModalVisible, setIsEditModalVisible] = useState(false);  // Separate state for EditModal
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
@@ -65,6 +68,17 @@ export default function WarehousePage() {
         }
     };
 
+    const handleEdit = async (values) => {
+        try {
+            await createProducts(values);
+            setIsModalVisible(false);
+            const productsResponse = await products();
+            setDataSources((prev) => ({ ...prev, 2: productsResponse.data }));
+        } catch (error) {
+            console.error('Error creating product:', error);
+        }
+    };
+
     const handleCancel = () => {
         setIsModalVisible(false);
         setIsPromptVisible(false);
@@ -95,6 +109,11 @@ export default function WarehousePage() {
             ? [...selectedProducts, record._id]
             : selectedProducts.filter(id => id !== record._id);
         setSelectedProducts(newSelectedProducts);
+    };
+
+    const handleProductNameSelect = (record) => {
+        setEditProduct({ productName: record.productName, productId: record.productId });
+        setIsEditModalVisible(true);  // Show the EditModal
     };
 
     const handleUpdateProducts = async () => {
@@ -182,7 +201,12 @@ export default function WarehousePage() {
         {
             title: 'ชื่อสินค้า',
             dataIndex: 'productName',
-            key: 'productName'
+            key: 'productName',
+            render: (text, record) => (
+                <Button type="link" onClick={() => handleProductNameSelect(record)}>
+                    {text}
+                </Button>
+            ),
         },
         {
             title: 'รหัสสินค้า',
@@ -275,10 +299,17 @@ export default function WarehousePage() {
                 </Select>
                 <p>ยืนยันที่จะเพิ่มสินค้าในคลังสินค้าหรือไม่?</p>
             </Modal>
-            <CreateProductModal
+            <CreateModal
                 visible={isModalVisible}
                 onCreate={handleCreate}
                 onCancel={handleCancel}
+            />
+            <EditModal
+                visible={isEditModalVisible}
+                onCreate={handleEdit}
+                onCancel={() => setIsEditModalVisible(false)}
+                productName={editProduct.productName}
+                productId={editProduct.productId}
             />
         </>
     );
