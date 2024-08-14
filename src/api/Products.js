@@ -41,3 +41,14 @@ export const productsById = async (id) => {
         return err;
     }
 }
+
+export const deleteProductById = async (id) => {
+    try {
+        const response = await API.delete(EndPoints.PRODUCT + '/delete-product/' + id);
+        return response.data;
+    } catch (error) {
+        console.error('Error deleting product:', error);
+        throw error;
+    }
+};
+
