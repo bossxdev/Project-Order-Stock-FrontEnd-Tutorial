@@ -220,6 +220,11 @@ export default function WarehousePage() {
             key: 'warehouseName'
         },
         {
+            title: 'ราคา',
+            dataIndex: 'price',
+            key: 'price'
+        },
+        {
             title: 'จำนวน',
             dataIndex: 'quantity',
             key: 'quantity'
