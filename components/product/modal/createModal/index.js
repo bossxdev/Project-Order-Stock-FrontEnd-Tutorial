@@ -1,7 +1,7 @@
 import React from 'react';
 import {Form, Input, Modal} from "antd";
 
-export default function CreateProductModal({ visible, onCreate, onCancel }) {
+export default function CreateModal({ visible, onCreate, onCancel }) {
     const [form] = Form.useForm();
     return (
         <Modal
