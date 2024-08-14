@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Card, Button, Checkbox, Input, InputNumber } from 'antd';
+import { Table, Card, Button, Checkbox, Input, InputNumber, message } from 'antd';
 import { useRouter } from "next/router";
 import { warehouseById } from 'api/Warehouse';
 import { productsById } from 'api/Products'; // Make sure to replace with the actual path
@@ -61,6 +61,13 @@ export default function ExportPage({ warehouseId }) {
     const handleOutQuantityChange = (value, key) => {
         setProductsData(prevData => prevData.map(item => {
             if (item.key === key) {
+                if (value > item.quantity) {
+                    message.error(`${item.productName} จำนวนสินค้านำออกมากกว่าจำนวนสินค้า`);
+                    return {
+                        ...item,
+                        outQuantity: item.outQuantity, // Keep the previous value if the input is invalid
+                    };
+                }
                 return {
                     ...item,
                     outQuantity: value,
