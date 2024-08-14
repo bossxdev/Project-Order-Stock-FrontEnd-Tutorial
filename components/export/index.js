@@ -3,12 +3,18 @@ import { Table, Card, Button, Checkbox, Input, InputNumber, message } from 'antd
 import { useRouter } from "next/router";
 import { warehouseById } from 'api/Warehouse';
 import { productsById, updateProducts } from 'api/Products';
+import { createExports } from 'api/Export';
 
 const { TextArea } = Input;
 
 const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-CA');
+};
+
+const generateDocumentNumber = () => {
+    const random = Math.floor(Math.random() * 10000);
+    return `QT2024-${random.toString().padStart(4, '0')}`;
 };
 
 export default function ExportPage({ warehouseId }) {
@@ -66,7 +72,7 @@ export default function ExportPage({ warehouseId }) {
                     message.error(`${item.productName} จำนวนสินค้านำออกมากกว่าจำนวนสินค้า`);
                     return {
                         ...item,
-                        outQuantity: item.outQuantity, // Keep the previous value if the input is invalid
+                        outQuantity: item.outQuantity,
                     };
                 }
                 return {
@@ -83,16 +89,25 @@ export default function ExportPage({ warehouseId }) {
         try {
             const selectedProducts = productsData.filter(product => selectedKeys.includes(product.key));
 
+            // Generate the document number
+            const documentNumber = generateDocumentNumber();
+
+            // Update each product's quantity
             await Promise.all(selectedProducts.map(product => {
-                const updateData = {
-                    quantity: product.outQuantity
-                };
+                const updateData = { quantity: product.totalQuantity };
                 return updateProducts(product.id, updateData);
             }));
 
-            message.success("Products updated successfully!");
+            // Create the export record
+            const exportData = {
+                exportId: documentNumber
+            };
+
+            await createExports(exportData);
+
+            message.success(`สร้างเอกสารใบนำออกสำเร็จ! ${documentNumber}`);
         } catch (error) {
-            message.error("An error occurred while updating products.");
+            message.error("สร้างเอกสารใบนำออกไม่สำเร็จ!");
         }
     };
 
