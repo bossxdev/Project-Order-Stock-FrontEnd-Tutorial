@@ -5,6 +5,7 @@ import { warehouseById } from 'api/Warehouse';
 import { productsById, updateProducts } from 'api/Products';
 import { shelf } from 'api/Shelf';
 import { exports } from 'api/Export';
+import html2pdf from 'html2pdf.js';
 
 const columns = [
     { title: 'รายการ', dataIndex: 'productName', key: 'productName' },
@@ -154,6 +155,11 @@ export default function ShelfPage({ warehouseId }) {
         return <div>Loading...</div>;
     }
 
+    const generatePDF = () => {
+        const element = document.getElementById('modal-content'); // Capture the content by ID
+        html2pdf().from(element).save(); // Convert and save as PDF
+    };
+
     return (
         <>
             <Card title="รายละเอียดคลังสินค้า" style={{ marginBottom: 16 }}>
@@ -202,7 +208,7 @@ export default function ShelfPage({ warehouseId }) {
                 okButtonProps={{ style: { display: 'none' } }}
             >
                 {modalContent && (
-                    <div>
+                    <div id="modal-content"> {/* Add ID here */}
                         <Card title="รายละเอียดชั้นวาง" style={{ marginBottom: 16 }}>
                             <div><strong>ชื่อชั้นวาง:</strong> {modalContent.shelfName}</div>
                             <div><strong>วันที่สร้าง:</strong> {modalContent.createdAt}</div>
@@ -236,6 +242,8 @@ export default function ShelfPage({ warehouseId }) {
                         </Card>
                     </div>
                 )}
+                {/* PDF Button */}
+                <Button type="default" onClick={generatePDF}>พิมพ์</Button>
             </Modal>
         </>
     );
