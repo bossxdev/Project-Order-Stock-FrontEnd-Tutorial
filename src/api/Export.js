@@ -24,7 +24,7 @@ export const exportsById = async (id) => {
 
 export const createExports = async (data) => {
     try {
-        const response = await API.post(EndPoints.EXPORT)
+        const response = await API.post(EndPoints.EXPORT + '/create-export', data)
         return response;
     } catch (err) {
         console.log(err);
