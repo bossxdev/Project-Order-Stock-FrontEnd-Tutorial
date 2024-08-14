@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Table, Card, Button, Checkbox, Input, InputNumber, message } from 'antd';
 import { useRouter } from "next/router";
 import { warehouseById } from 'api/Warehouse';
-import { productsById } from 'api/Products'; // Make sure to replace with the actual path
+import { productsById, updateProducts } from 'api/Products';
 
 const { TextArea } = Input;
 
@@ -31,6 +31,7 @@ export default function ExportPage({ warehouseId }) {
             const data = await productsById(warehouseId);
             setProductsData(data.map((product, index) => ({
                 key: String(index + 1),
+                id: product._id,
                 sequence: index + 1,
                 productName: product.productName,
                 quantity: product.quantity,
@@ -76,6 +77,23 @@ export default function ExportPage({ warehouseId }) {
             }
             return item;
         }));
+    };
+
+    const handleSave = async () => {
+        try {
+            const selectedProducts = productsData.filter(product => selectedKeys.includes(product.key));
+
+            await Promise.all(selectedProducts.map(product => {
+                const updateData = {
+                    quantity: product.outQuantity
+                };
+                return updateProducts(product.id, updateData);
+            }));
+
+            message.success("Products updated successfully!");
+        } catch (error) {
+            message.error("An error occurred while updating products.");
+        }
     };
 
     const columns = [
@@ -138,7 +156,7 @@ export default function ExportPage({ warehouseId }) {
             <Table columns={columns} dataSource={productsData} pagination={false} style={{ marginTop: 16 }} summary={summaryRow} />
             <div style={{ position: 'fixed', bottom: 16, right: 16 }}>
                 <Button type="default" style={{ marginRight: 8 }} onClick={handleCancel}>ยกเลิก</Button>
-                <Button type="primary">บันทึก</Button>
+                <Button type="primary" onClick={handleSave}>บันทึก</Button>
             </div>
         </>
     );
